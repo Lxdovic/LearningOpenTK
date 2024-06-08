@@ -1,3 +1,11 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using OpenTK.Windowing.Desktop;
 
-Console.WriteLine("Hello, World!");
+namespace LearningOpenTK;
+
+public static class Program {
+    public static void Main() {
+        using var game = new Game(new GameWindowSettings(), new NativeWindowSettings());
+        game.Run();
+    }
+}
+
