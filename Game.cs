@@ -6,14 +6,20 @@ using OpenTK.Windowing.Desktop;
 namespace LearningOpenTK;
 
 public class Game : GameWindow {
+    private readonly uint[] _indices = [
+        0, 1, 2,
+        2, 3, 0
+    ];
+
     private readonly float[] _vertices = [
-        0f, .5f, 0f,
-        -.5f, -.5f, 0f,
-        .5f, -.5f, 0f
+        -.5f, .5f, 0f,
+        .5f, .5f, 0f,
+        .5f, -.5f, 0f,
+        -.5f, -.5f, 0f
     ];
 
     private int _shaderProgram;
-    private int _vao, _vbo;
+    private int _vao, _vbo, _ebo;
     private int _width, _height;
 
     public Game(int width, int height) : base(GameWindowSettings.Default,
@@ -48,6 +54,12 @@ public class Game : GameWindow {
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
         GL.BindVertexArray(0);
 
+        _ebo = GL.GenBuffer();
+
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, _indices, BufferUsage.StaticDraw);
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+
         _shaderProgram = GL.CreateProgram();
 
         var vertexShader = GL.CreateShader(ShaderType.VertexShader);
@@ -74,7 +86,8 @@ public class Game : GameWindow {
         base.OnUnload();
 
         GL.DeleteVertexArray(_vao);
-        // GL.DeleteBuffer(_vbo);
+        GL.DeleteBuffer(_vbo);
+        GL.DeleteBuffer(_ebo);
         GL.DeleteProgram(_shaderProgram);
     }
 
@@ -84,7 +97,8 @@ public class Game : GameWindow {
 
         GL.UseProgram(_shaderProgram);
         GL.BindVertexArray(_vao);
-        GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
         Context.SwapBuffers();
 
