@@ -6,7 +6,7 @@ using StbImageSharp;
 
 namespace LearningOpenTK;
 
-public class Game : GameWindow {
+internal sealed class Game : GameWindow {
     private readonly uint[] _indices = [
         0, 1, 2,
         2, 3, 0,
@@ -91,6 +91,8 @@ public class Game : GameWindow {
         new Vector3(0.5f, -0.5f, -0.5f), // bottomright vert
         new Vector3(-0.5f, -0.5f, -0.5f) // bottomleft vert
     ];
+
+    private Camera _camera;
 
     private int _shaderProgram;
     private int _textureId;
@@ -191,6 +193,9 @@ public class Game : GameWindow {
 
         GL.BindTexture(TextureTarget.Texture2d, 0);
         GL.Enable(EnableCap.DepthTest);
+
+        _camera = new Camera(_width, _height, new Vector3(0f, 0f, 3f));
+        CursorState = CursorState.Grabbed;
     }
 
     protected override void OnRenderFrame(FrameEventArgs args) {
@@ -203,16 +208,14 @@ public class Game : GameWindow {
 
         GL.BindTexture(TextureTarget.Texture2d, _textureId);
 
-        var model = Matrix4.Identity;
-        var view = Matrix4.Identity;
-        var projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45f),
-            (float)_width / _height, 0.1f, 100f);
+        var view = _camera.GetViewMatrix();
+        var projection = _camera.GetProjectionMatrix();
 
         var modelLocation = GL.GetUniformLocation(_shaderProgram, "model");
         var viewLocation = GL.GetUniformLocation(_shaderProgram, "view");
         var projectionLocation = GL.GetUniformLocation(_shaderProgram, "projection");
 
-        model = Matrix4.CreateRotationY(_yRotation);
+        var model = Matrix4.CreateRotationY(_yRotation);
         model *= Matrix4.CreateTranslation(new Vector3(0f, 0f, -3f));
 
         _yRotation += 0.0001f;
@@ -223,6 +226,11 @@ public class Game : GameWindow {
 
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
+        model += Matrix4.CreateTranslation(new Vector3(2f, 0f, 0f));
+
+        GL.UniformMatrix4f(modelLocation, 1, true, model);
+        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+
         Context.SwapBuffers();
 
         base.OnRenderFrame(args);
@@ -230,6 +238,8 @@ public class Game : GameWindow {
 
     protected override void OnUpdateFrame(FrameEventArgs args) {
         base.OnUpdateFrame(args);
+
+        _camera.Update(KeyboardState, MouseState, args);
     }
 
     protected override void OnUnload() {

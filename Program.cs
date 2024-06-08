@@ -1,11 +1,8 @@
-﻿using OpenTK.Windowing.Desktop;
-
-namespace LearningOpenTK;
+﻿namespace LearningOpenTK;
 
 public static class Program {
     public static void Main() {
-        using var game = new Game(500, 500);
+        using var game = new Game(1280, 700);
         game.Run();
     }
 }
-
