@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="OpenTK" Version="5.0.0-pre.10"/>
+        <PackageReference Include="StbImageSharp" Version="2.27.14" />
     </ItemGroup>
 
     <ItemGroup>
