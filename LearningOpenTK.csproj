@@ -8,7 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="OpenTK" Version="5.0.0-pre.10" />
+        <PackageReference Include="OpenTK" Version="5.0.0-pre.10"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="resources\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 </Project>

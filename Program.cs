@@ -4,7 +4,7 @@ namespace LearningOpenTK;
 
 public static class Program {
     public static void Main() {
-        using var game = new Game(new GameWindowSettings(), new NativeWindowSettings());
+        using var game = new Game(500, 500);
         game.Run();
     }
 }
