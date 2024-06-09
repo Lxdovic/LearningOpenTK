@@ -1,6 +1,7 @@
 using LearningOpenTK.Graphics;
 using OpenTK.Graphics.OpenGL.Compatibility;
 using OpenTK.Mathematics;
+using SimplexNoise;
 
 namespace LearningOpenTK.World;
 
@@ -39,29 +40,33 @@ internal class Chunk {
     }
 
     public float[,] GenerateChunk() {
-        var perlin = new Perlin();
-        var heightMap = new float[Size, Size];
+        var heightmap = new float[Size, Size];
 
-        for (var i = 0; i < Size; i++)
-        for (var j = 0; j < Size; j++) {
-            var x = i + Position.X;
-            var z = j + Position.Z;
+        Noise.Seed = 123456;
 
-            var height = perlin.OctavePerlin(x / 32f, 0, z / 32f, 4, 0.5f) * 0.5f + 0.5f;
-            heightMap[i, j] = (float)height;
+        for (var x = 0; x < Size; x++)
+        for (var z = 0; z < Size; z++) {
+            heightmap[x, z] = Noise.CalcPixel2D(x, z, 0.01f);
+
+            Console.WriteLine(heightmap[x, z]);
         }
 
-        return heightMap;
+        return heightmap;
     }
 
     public void GenerateBlocks(float[,] heightMap) {
         for (var x = 0; x < Size; x++)
         for (var z = 0; z < Size; z++) {
-            var columnHeight = (int)(heightMap[x, z] * Height);
+            var columnHeight = (int)heightMap[x, z] / 10;
 
             for (var y = 0; y < Height; y++) {
                 var position = new Vector3(x, y, z);
-                var type = y < columnHeight ? BlockType.Dirt : BlockType.Air;
+
+                var type = columnHeight switch {
+                    _ when y < columnHeight - 1 => BlockType.Dirt,
+                    _ when y == columnHeight - 1 => BlockType.Grass,
+                    _ => BlockType.Air
+                };
 
                 _blocks[x, y, z] = new Block(position, type);
             }
@@ -125,7 +130,7 @@ internal class Chunk {
 
         _ibo = new Ibo(_chunkIndices);
 
-        _texture = new Texture("resources/textures/dirt.png");
+        _texture = new Texture("resources/textures/atlas.png");
     }
 
     public void Render(ShaderProgram shaderProgram) {

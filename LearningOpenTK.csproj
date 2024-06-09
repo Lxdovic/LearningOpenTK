@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="OpenTK" Version="5.0.0-pre.10"/>
+        <PackageReference Include="SimplexNoise" Version="2.0.0"/>
         <PackageReference Include="StbImageSharp" Version="2.27.14"/>
     </ItemGroup>
 
@@ -16,9 +17,5 @@
         <Content Include="resources\**">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="resources\textures\"/>
     </ItemGroup>
 </Project>

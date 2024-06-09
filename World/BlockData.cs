@@ -4,7 +4,8 @@ namespace LearningOpenTK.World;
 
 internal enum BlockType {
     Air,
-    Dirt
+    Dirt,
+    Grass
 }
 
 internal enum Face {

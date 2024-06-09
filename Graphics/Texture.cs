@@ -18,7 +18,7 @@ internal sealed class Texture {
         StbImage.stbi_set_flip_vertically_on_load(1);
         var dirtTexture =
             ImageResult.FromStream(
-                File.OpenRead(Path.Combine(Environment.CurrentDirectory, "resources/textures/dirt.png")),
+                File.OpenRead(Path.Combine(Environment.CurrentDirectory, "resources/textures/atlas.png")),
                 ColorComponents.RedGreenBlueAlpha);
 
         GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba, dirtTexture.Width, dirtTexture.Height, 0,
