@@ -6,7 +6,7 @@ using SimplexNoise;
 namespace LearningOpenTK.World;
 
 internal class Chunk {
-    private const int Size = 16;
+    internal const int Size = 16;
     private const int Height = 32;
 
     private readonly Block[,,] _blocks = new Block[Size, Height, Size];
@@ -42,14 +42,10 @@ internal class Chunk {
     public float[,] GenerateChunk() {
         var heightmap = new float[Size, Size];
 
-        Noise.Seed = 123456;
 
         for (var x = 0; x < Size; x++)
-        for (var z = 0; z < Size; z++) {
-            heightmap[x, z] = Noise.CalcPixel2D(x, z, 0.01f);
-
-            Console.WriteLine(heightmap[x, z]);
-        }
+        for (var z = 0; z < Size; z++)
+            heightmap[x, z] = Noise.CalcPixel2D((int)(Position.X + x), (int)(Position.Z + z), 0.01f) / 128f / 2;
 
         return heightmap;
     }
@@ -57,10 +53,10 @@ internal class Chunk {
     public void GenerateBlocks(float[,] heightMap) {
         for (var x = 0; x < Size; x++)
         for (var z = 0; z < Size; z++) {
-            var columnHeight = (int)heightMap[x, z] / 10;
+            var columnHeight = (int)(heightMap[x, z] * Height);
 
             for (var y = 0; y < Height; y++) {
-                var position = new Vector3(x, y, z);
+                var position = Position + new Vector3(x, y, z);
 
                 var type = columnHeight switch {
                     _ when y < columnHeight - 1 => BlockType.Dirt,
@@ -140,6 +136,9 @@ internal class Chunk {
         _texture.Bind();
 
         GL.DrawElements(PrimitiveType.Triangles, _chunkIndices.Count, DrawElementsType.UnsignedInt, 0);
+
+        _vao.UnBind();
+        _ibo.UnBind();
     }
 
     public void Dispose() {

@@ -8,8 +8,9 @@ using OpenTK.Windowing.Desktop;
 namespace LearningOpenTK;
 
 internal sealed class Game : GameWindow {
+    private readonly List<Chunk> _chunks = new();
+    private readonly int _renderDistance = 3;
     private Camera _camera;
-    private Chunk _chunk;
     private Ibo _ibo;
     private ShaderProgram _shaderProgram;
     private Texture _texture;
@@ -37,9 +38,12 @@ internal sealed class Game : GameWindow {
     protected override void OnLoad() {
         base.OnLoad();
 
-        _chunk = new Chunk(Vector3.Zero);
-        _shaderProgram = new ShaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
 
+        for (var x = -_renderDistance; x < _renderDistance; x++)
+        for (var z = -_renderDistance; z < _renderDistance; z++)
+            _chunks.Add(new Chunk(new Vector3(x * Chunk.Size, 0, z * Chunk.Size)));
+
+        _shaderProgram = new ShaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
 
         GL.Enable(EnableCap.DepthTest);
         GL.FrontFace(FrontFaceDirection.Cw);
@@ -66,7 +70,9 @@ internal sealed class Game : GameWindow {
         GL.UniformMatrix4f(viewLocation, 1, true, view);
         GL.UniformMatrix4f(projectionLocation, 1, true, projection);
 
-        _chunk.Render(_shaderProgram);
+
+        foreach (var chunk in _chunks)
+            chunk.Render(_shaderProgram);
 
         Context.SwapBuffers();
 

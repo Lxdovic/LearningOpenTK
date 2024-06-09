@@ -5,7 +5,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 namespace LearningOpenTK;
 
 internal sealed class Camera(float width, float height, Vector3 position) {
-    private const float Sensitivity = 180f;
+    private const float Sensitivity = 50f;
     private const float Speed = 8f;
     private bool _firstMove = true;
     private Vector3 _front = -Vector3.UnitZ;
@@ -38,7 +38,7 @@ internal sealed class Camera(float width, float height, Vector3 position) {
     }
 
     public Matrix4 GetProjectionMatrix() {
-        return Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), width / height, 0.1f,
+        return Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(70), width / height, 0.1f,
             100f);
     }
 
