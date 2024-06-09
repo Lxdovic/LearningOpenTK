@@ -7,6 +7,8 @@ namespace LearningOpenTK.World;
 internal class Chunk {
     private const int Size = 16;
     private const int Height = 32;
+
+    private readonly Block[,,] _blocks = new Block[Size, Height, Size];
     private readonly List<uint> _chunkIndices;
     private readonly List<Vector2> _chunkUvs;
     private readonly List<Vector3> _chunkVertices;
@@ -21,6 +23,7 @@ internal class Chunk {
 
     public Vector3 Position;
 
+
     public Chunk(Vector3 position) {
         Position = position;
 
@@ -28,27 +31,73 @@ internal class Chunk {
         _chunkUvs = new List<Vector2>();
         _chunkIndices = new List<uint>();
 
-        GenerateBlocks();
+        var heightMap = GenerateChunk();
+
+        GenerateBlocks(heightMap);
+        GenFaces();
         BuildChunk();
     }
 
-    public void GenerateChunk() {
+    public float[,] GenerateChunk() {
+        var perlin = new Perlin();
+        var heightMap = new float[Size, Size];
+
+        for (var i = 0; i < Size; i++)
+        for (var j = 0; j < Size; j++) {
+            var x = i + Position.X;
+            var z = j + Position.Z;
+
+            var height = perlin.OctavePerlin(x / 32f, 0, z / 32f, 4, 0.5f) * 0.5f + 0.5f;
+            heightMap[i, j] = (float)height;
+        }
+
+        return heightMap;
     }
 
-    public void GenerateBlocks() {
-        for (var i = 0; i < Size; i++)
-        for (var j = 0; j < Height; j++)
-        for (var k = 0; k < Size; k++) {
-            var block = new Block(new Vector3(i, j, k));
+    public void GenerateBlocks(float[,] heightMap) {
+        for (var x = 0; x < Size; x++)
+        for (var z = 0; z < Size; z++) {
+            var columnHeight = (int)(heightMap[x, z] * Height);
 
-            foreach (var face in Enum.GetValues<Face>()) {
-                var faceData = block.GetFace(face);
+            for (var y = 0; y < Height; y++) {
+                var position = new Vector3(x, y, z);
+                var type = y < columnHeight ? BlockType.Dirt : BlockType.Air;
 
-                _chunkVertices.AddRange(faceData.Vertices);
-                _chunkUvs.AddRange(faceData.Uv);
-                AddIndices(1);
+                _blocks[x, y, z] = new Block(position, type);
             }
         }
+    }
+
+    public void GenFaces() {
+        for (var x = 0; x < Size; x++)
+        for (var z = 0; z < Size; z++)
+        for (var y = 0; y < Height; y++) {
+            var block = _blocks[x, y, z];
+
+            if (block.Type == BlockType.Air) continue;
+
+            if (y < Height - 1 && _blocks[x, y + 1, z].Type == BlockType.Air) AddFace(block, Face.Top);
+            if (y == Height - 1) AddFace(block, Face.Top);
+            if (y > 0 && _blocks[x, y - 1, z].Type == BlockType.Air) AddFace(block, Face.Bottom);
+            if (y == 0) AddFace(block, Face.Bottom);
+            if (x > 0 && _blocks[x - 1, y, z].Type == BlockType.Air) AddFace(block, Face.Left);
+            if (x == 0) AddFace(block, Face.Left);
+            if (x < Size - 1 && _blocks[x + 1, y, z].Type == BlockType.Air) AddFace(block, Face.Right);
+            if (x == Size - 1) AddFace(block, Face.Right);
+            if (z > 0 && _blocks[x, y, z - 1].Type == BlockType.Air) AddFace(block, Face.Back);
+            if (z == 0) AddFace(block, Face.Back);
+            if (z < Size - 1 && _blocks[x, y, z + 1].Type == BlockType.Air) AddFace(block, Face.Front);
+            if (z == Size - 1) AddFace(block, Face.Front);
+        }
+    }
+
+    private void AddFace(Block block, Face face) {
+        var faceData = block.GetFace(face);
+
+        _chunkVertices.AddRange(faceData.Vertices);
+        _chunkUvs.AddRange(faceData.Uv);
+
+        AddIndices(1);
     }
 
     private void AddIndices(int amount) {

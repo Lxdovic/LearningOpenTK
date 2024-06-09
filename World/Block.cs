@@ -5,6 +5,7 @@ namespace LearningOpenTK.World;
 internal class Block {
     public Dictionary<Face, FaceData> Faces;
     public Vector3 Position;
+    public BlockType Type;
 
     public List<Vector2> Uv = [
         new Vector2(0.0f, 1.0f),
@@ -13,8 +14,9 @@ internal class Block {
         new Vector2(0.0f, 0.0f)
     ];
 
-    public Block(Vector3 position) {
+    public Block(Vector3 position, BlockType type) {
         Position = position;
+        Type = type;
 
         Faces = new Dictionary<Face, FaceData> {
             {

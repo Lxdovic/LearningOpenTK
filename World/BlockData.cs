@@ -2,6 +2,11 @@ using OpenTK.Mathematics;
 
 namespace LearningOpenTK.World;
 
+internal enum BlockType {
+    Air,
+    Dirt
+}
+
 internal enum Face {
     Top,
     Bottom,
@@ -27,24 +32,24 @@ internal struct RawFaceData {
             ]
         }, {
             Face.Back, [
-                new Vector3(0.5f, 0.5f, 0.5f),
-                new Vector3(0.5f, 0.5f, -0.5f),
-                new Vector3(0.5f, -0.5f, -0.5f),
-                new Vector3(0.5f, -0.5f, 0.5f)
-            ]
-        }, {
-            Face.Left, [
                 new Vector3(0.5f, 0.5f, -0.5f),
                 new Vector3(-0.5f, 0.5f, -0.5f),
                 new Vector3(-0.5f, -0.5f, -0.5f),
                 new Vector3(0.5f, -0.5f, -0.5f)
             ]
         }, {
-            Face.Right, [
+            Face.Left, [
                 new Vector3(-0.5f, 0.5f, -0.5f),
                 new Vector3(-0.5f, 0.5f, 0.5f),
                 new Vector3(-0.5f, -0.5f, 0.5f),
                 new Vector3(-0.5f, -0.5f, -0.5f)
+            ]
+        }, {
+            Face.Right, [
+                new Vector3(0.5f, 0.5f, 0.5f),
+                new Vector3(0.5f, 0.5f, -0.5f),
+                new Vector3(0.5f, -0.5f, -0.5f),
+                new Vector3(0.5f, -0.5f, 0.5f)
             ]
         }, {
             Face.Top, [

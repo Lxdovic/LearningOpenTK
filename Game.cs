@@ -42,6 +42,9 @@ internal sealed class Game : GameWindow {
 
 
         GL.Enable(EnableCap.DepthTest);
+        GL.FrontFace(FrontFaceDirection.Cw);
+        GL.Enable(EnableCap.CullFace);
+        GL.CullFace(TriangleFace.Back);
 
         _camera = new Camera(_width, _height, new Vector3(0f, 0f, 3f));
         CursorState = CursorState.Grabbed;
