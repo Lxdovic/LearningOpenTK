@@ -6,7 +6,7 @@ namespace LearningOpenTK;
 
 internal sealed class Camera(float width, float height, Vector3 position) {
     private const float Sensitivity = 50f;
-    private const float Speed = 8f;
+    private const float Speed = 16f;
     private bool _firstMove = true;
     private Vector3 _front = -Vector3.UnitZ;
     private float _pitch;
@@ -39,7 +39,7 @@ internal sealed class Camera(float width, float height, Vector3 position) {
 
     public Matrix4 GetProjectionMatrix() {
         return Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(70), width / height, 0.1f,
-            100f);
+            1000f);
     }
 
     public void Update(KeyboardState input, MouseState mouse, FrameEventArgs e) {

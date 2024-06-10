@@ -9,8 +9,9 @@ namespace LearningOpenTK;
 
 internal sealed class Game : GameWindow {
     private readonly List<Chunk> _chunks = new();
-    private readonly int _renderDistance = 4;
+    private readonly int _renderDistance = 20;
     private Camera _camera;
+    internal static Texture Atlas = new("resources/textures/atlas.png");
     private ShaderProgram _shaderProgram;
 
     private int _width, _height;
@@ -34,8 +35,7 @@ internal sealed class Game : GameWindow {
 
     protected override void OnLoad() {
         base.OnLoad();
-
-
+        
         for (var x = -_renderDistance; x < _renderDistance; x++)
         for (var z = -_renderDistance; z < _renderDistance; z++)
             _chunks.Add(new Chunk(new Vector3(x * Chunk.Size, 0, z * Chunk.Size)));
@@ -43,7 +43,7 @@ internal sealed class Game : GameWindow {
         // _chunks.Add(new Chunk(Vector3.Zero));
 
         _shaderProgram = new ShaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
-
+        
         GL.Enable(EnableCap.DepthTest);
         GL.FrontFace(FrontFaceDirection.Cw);
         GL.Enable(EnableCap.CullFace);

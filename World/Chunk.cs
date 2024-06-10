@@ -15,8 +15,6 @@ internal class Chunk {
     private readonly List<Vector3> _chunkVertices;
     private Ibo _ibo;
     private uint _indexCount;
-
-    private Texture _texture;
     private Vbo _uvVbo;
 
     private Vao _vao;
@@ -156,15 +154,13 @@ internal class Chunk {
         _vao.LinkToVao(1, 2, _uvVbo);
 
         _ibo = new Ibo(_chunkIndices);
-
-        _texture = new Texture("resources/textures/atlas.png");
     }
 
     public void Render(ShaderProgram shaderProgram) {
         shaderProgram.Bind();
         _vao.Bind();
         _ibo.Bind();
-        _texture.Bind();
+        Game.Atlas.Bind();
 
         GL.DrawElements(PrimitiveType.Triangles, _chunkIndices.Count, DrawElementsType.UnsignedInt, 0);
 
@@ -177,6 +173,5 @@ internal class Chunk {
         _vertexVbo.Delete();
         _uvVbo.Delete();
         _ibo.Delete();
-        _texture.Delete();
     }
 }
