@@ -9,12 +9,9 @@ namespace LearningOpenTK;
 
 internal sealed class Game : GameWindow {
     private readonly List<Chunk> _chunks = new();
-    private readonly int _renderDistance = 3;
+    private readonly int _renderDistance = 4;
     private Camera _camera;
-    private Ibo _ibo;
     private ShaderProgram _shaderProgram;
-    private Texture _texture;
-    private Vao _vao;
 
     private int _width, _height;
 
@@ -43,6 +40,8 @@ internal sealed class Game : GameWindow {
         for (var z = -_renderDistance; z < _renderDistance; z++)
             _chunks.Add(new Chunk(new Vector3(x * Chunk.Size, 0, z * Chunk.Size)));
 
+        // _chunks.Add(new Chunk(Vector3.Zero));
+
         _shaderProgram = new ShaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
 
         GL.Enable(EnableCap.DepthTest);
@@ -50,7 +49,7 @@ internal sealed class Game : GameWindow {
         GL.Enable(EnableCap.CullFace);
         GL.CullFace(TriangleFace.Back);
 
-        _camera = new Camera(_width, _height, new Vector3(0f, 0f, 3f));
+        _camera = new Camera(_width, _height, new Vector3(0f, 44f, 3f));
         CursorState = CursorState.Grabbed;
     }
 

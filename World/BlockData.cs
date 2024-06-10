@@ -17,11 +17,6 @@ internal enum Face {
     Back
 }
 
-internal struct FaceData {
-    public List<Vector3> Vertices;
-    public List<Vector2> Uv;
-}
-
 internal struct RawFaceData {
     public static readonly Dictionary<Face, List<Vector3>> RawVertexData = new() {
         {
@@ -68,7 +63,4 @@ internal struct RawFaceData {
             ]
         }
     };
-}
-
-internal sealed class BlockData {
 }
