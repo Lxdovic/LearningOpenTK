@@ -5,7 +5,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 namespace LearningOpenTK;
 
 internal sealed class Camera(float width, float height, Vector3 position) {
-    private const float Sensitivity = 50f;
+    private const float Sensitivity = 0.1f;
     private const float Speed = 16f;
     private bool _firstMove = true;
     private Vector3 _front = -Vector3.UnitZ;
@@ -18,11 +18,7 @@ internal sealed class Camera(float width, float height, Vector3 position) {
     private Vector2 LastPos { get; set; }
 
     private void UpdateVectors() {
-        if (_pitch > 89.0f)
-            _pitch = 89.0f;
-
-        if (_pitch < -89.0f)
-            _pitch = -89.0f;
+        _pitch = Math.Clamp(_pitch, -89.0f, 89.0f);
 
         _front.X = MathF.Cos(MathHelper.DegreesToRadians(_pitch)) * MathF.Cos(MathHelper.DegreesToRadians(_yaw));
         _front.Y = MathF.Sin(MathHelper.DegreesToRadians(_pitch));
@@ -71,8 +67,8 @@ internal sealed class Camera(float width, float height, Vector3 position) {
 
             LastPos = new Vector2(mouse.X, mouse.Y);
 
-            _yaw += deltaX * Sensitivity * (float)e.Time;
-            _pitch -= deltaY * Sensitivity * (float)e.Time;
+            _yaw += deltaX * Sensitivity;
+            _pitch -= deltaY * Sensitivity;
         }
 
         UpdateVectors();
