@@ -5,6 +5,8 @@ using SimplexNoise;
 
 namespace LearningOpenTK.World;
 
+using Block = (int type, int x, int y, int z);
+
 internal class Chunk {
     internal const int Size = 16;
     private const int Height = 64;
@@ -75,7 +77,7 @@ internal class Chunk {
         }
     }
 
-    public (int type, int x, int y, int z) GetBlockData(ushort block) {
+    public Block GetBlockData(ushort block) {
         var type = block >> 14;
         var x = (block >> 10) & 0b1111;
         var y = (block >> 4) & 0b111111;
@@ -83,6 +85,31 @@ internal class Chunk {
 
         return (type, x, y, z);
     }
+
+    private Block LeftBlockData(Block block) {
+        return GetBlockData(_blocks[block.x - 1 + block.y * Size + block.z * Size * Height]);
+    }
+
+    private Block RightBlockData(Block block) {
+        return GetBlockData(_blocks[block.x + 1 + block.y * Size + block.z * Size * Height]);
+    }
+
+    private Block BottomBlockData(Block block) {
+        return GetBlockData(_blocks[block.x + (block.y - 1) * Size + block.z * Size * Height]);
+    }
+
+    private Block TopBlockData(Block block) {
+        return GetBlockData(_blocks[block.x + (block.y + 1) * Size + block.z * Size * Height]);
+    }
+
+    private Block BackBlockData(Block block) {
+        return GetBlockData(_blocks[block.x + block.y * Size + (block.z - 1) * Size * Height]);
+    }
+
+    private Block FrontBlockData(Block block) {
+        return GetBlockData(_blocks[block.x + block.y * Size + (block.z + 1) * Size * Height]);
+    }
+
 
     public void GenFaces() {
         for (var x = 0; x < Size; x++)
@@ -92,44 +119,28 @@ internal class Chunk {
 
             if (block.type == (int)BlockType.Air) continue;
 
-            if (block.y < Height - 1 &&
-                GetBlockData(_blocks[block.x + (block.y + 1) * Size + block.z * Size * Height]).type ==
-                (int)BlockType.Air) AddFace(block, Face.Top);
-            if (block.y == Height - 1) AddFace(block, Face.Top);
-            if (block.y > 0 && GetBlockData(_blocks[block.x + (block.y - 1) * Size + block.z * Size * Height]).type ==
-                (int)BlockType.Air)
-                AddFace(block, Face.Bottom);
             if (block.y == 0) AddFace(block, Face.Bottom);
-            if (block.x > 0 && GetBlockData(_blocks[block.x - 1 + block.y * Size + block.z * Size * Height]).type ==
-                (int)BlockType.Air)
-                AddFace(
-                    block, Face.Left);
             if (block.x == 0) AddFace(block, Face.Left);
-            if (block.x < Size - 1 &&
-                GetBlockData(_blocks[block.x + 1 + block.y * Size + block.z * Size * Height]).type ==
-                (int)BlockType.Air)
-                AddFace(block, Face.Right);
-            if (block.x == Size - 1) AddFace(block, Face.Right);
-            if (block.z > 0 && GetBlockData(_blocks[block.x + block.y * Size + (block.z - 1) * Size * Height]).type ==
-                (int)BlockType.Air)
-                AddFace(block, Face.Back);
             if (block.z == 0) AddFace(block, Face.Back);
-            if (block.z < Size - 1 &&
-                GetBlockData(_blocks[block.x + block.y * Size + (block.z + 1) * Size * Height]).type ==
-                (int)BlockType.Air) AddFace(block, Face.Front);
+            if (block.y == Height - 1) AddFace(block, Face.Top);
+            if (block.x == Size - 1) AddFace(block, Face.Right);
             if (block.z == Size - 1) AddFace(block, Face.Front);
+            if (block.y > 0 && BottomBlockData(block).type == (int)BlockType.Air) AddFace(block, Face.Bottom);
+            if (block.x > 0 && LeftBlockData(block).type == (int)BlockType.Air) AddFace(block, Face.Left);
+            if (block.z > 0 && BackBlockData(block).type == (int)BlockType.Air) AddFace(block, Face.Back);
+            if (block.y < Height - 1 && TopBlockData(block).type == (int)BlockType.Air) AddFace(block, Face.Top);
+            if (block.x < Size - 1 && RightBlockData(block).type == (int)BlockType.Air) AddFace(block, Face.Right);
+            if (block.z < Size - 1 && FrontBlockData(block).type == (int)BlockType.Air) AddFace(block, Face.Front);
         }
     }
 
-    private void AddFace((int type, int x, int y, int z) block, Face face) {
+    private void AddFace(Block block, Face face) {
         var faceData = RawFaceData.RawVertexData[face];
         var uvData = TextureData.BlockTypeUvs[(BlockType)block.type];
 
-        for (var index = 0; index < faceData.Count; index++) {
-            var vertex = faceData[index];
+        foreach (var vertex in faceData)
             _chunkVertices.Add(new Vector3(Position.X + vertex.X + block.x, Position.Y + vertex.Y + block.y,
                 Position.Z + vertex.Z + block.z));
-        }
 
         _chunkUvs.AddRange([
             new Vector2((uvData[(int)face].X + 1) / 16f, (uvData[(int)face].Y + 1) / 16f),

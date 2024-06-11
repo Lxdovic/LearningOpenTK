@@ -88,7 +88,7 @@ internal sealed class Game : GameWindow {
             LoadChunks();
         }
 
-        const int chunksToUnloadPerFrame = 1;
+        const int chunksToUnloadPerFrame = 2;
 
         for (var i = 0; i < chunksToUnloadPerFrame && _chunksToUnload.Count > 0; i++) {
             var chunk = _chunksToUnload.Dequeue();
