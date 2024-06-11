@@ -13,15 +13,13 @@ internal class Chunk {
     private readonly List<uint> _chunkIndices;
     private readonly List<Vector2> _chunkUvs;
     private readonly List<Vector3> _chunkVertices;
-    private Ibo _ibo;
+    private readonly Ibo _ibo;
+    private readonly Vbo _uvVbo;
+    private readonly Vao _vao;
+    private readonly Vbo _vertexVbo;
     private uint _indexCount;
-    private Vbo _uvVbo;
-
-    private Vao _vao;
-    private Vbo _vertexVbo;
 
     public Vector3 Position;
-
 
     public Chunk(Vector3 position) {
         Position = position;
@@ -34,7 +32,20 @@ internal class Chunk {
 
         GenerateBlocks(heightMap);
         GenFaces();
-        BuildChunk();
+
+
+        _vao = new Vao();
+        _vao.Bind();
+
+        _vertexVbo = new Vbo(_chunkVertices);
+        _vertexVbo.Bind();
+        _vao.LinkToVao(0, 3, _vertexVbo);
+
+        _uvVbo = new Vbo(_chunkUvs);
+        _uvVbo.Bind();
+        _vao.LinkToVao(1, 2, _uvVbo);
+
+        _ibo = new Ibo(_chunkIndices);
     }
 
     public float[,] GenerateChunk() {
@@ -42,7 +53,7 @@ internal class Chunk {
 
         for (var x = 0; x < Size; x++)
         for (var z = 0; z < Size; z++)
-            heightmap[x, z] = Noise.CalcPixel2D((int)(Position.X + x), (int)(Position.Z + z), 0.01f) / 128f / 2;
+            heightmap[x, z] = Noise.CalcPixel2D((int)(Position.X + x), (int)(Position.Z + z), 0.005f) / 128f / 2;
 
         return heightmap;
     }
@@ -139,21 +150,6 @@ internal class Chunk {
 
             _indexCount += 4;
         }
-    }
-
-    public void BuildChunk() {
-        _vao = new Vao();
-        _vao.Bind();
-
-        _vertexVbo = new Vbo(_chunkVertices);
-        _vertexVbo.Bind();
-        _vao.LinkToVao(0, 3, _vertexVbo);
-
-        _uvVbo = new Vbo(_chunkUvs);
-        _uvVbo.Bind();
-        _vao.LinkToVao(1, 2, _uvVbo);
-
-        _ibo = new Ibo(_chunkIndices);
     }
 
     public void Render(ShaderProgram shaderProgram) {

@@ -14,6 +14,7 @@ internal sealed class Camera(float width, float height, Vector3 position) {
     private Vector3 _right = Vector3.UnitX;
     private Vector3 _up = Vector3.UnitY;
     private float _yaw = -90f;
+    internal Vector3 Position = position;
 
     private Vector2 LastPos { get; set; }
 
@@ -30,7 +31,7 @@ internal sealed class Camera(float width, float height, Vector3 position) {
     }
 
     public Matrix4 GetViewMatrix() {
-        return Matrix4.LookAt(position, position + _front, _up);
+        return Matrix4.LookAt(Position, Position + _front, _up);
     }
 
     public Matrix4 GetProjectionMatrix() {
@@ -44,17 +45,17 @@ internal sealed class Camera(float width, float height, Vector3 position) {
 
     private void InputController(KeyboardState input, MouseState mouse, FrameEventArgs e) {
         if (input.IsKeyDown(Keys.W))
-            position += _front * Speed * (float)e.Time;
+            Position += _front * Speed * (float)e.Time;
         if (input.IsKeyDown(Keys.S))
-            position -= _front * Speed * (float)e.Time;
+            Position -= _front * Speed * (float)e.Time;
         if (input.IsKeyDown(Keys.A))
-            position -= _right * Speed * (float)e.Time;
+            Position -= _right * Speed * (float)e.Time;
         if (input.IsKeyDown(Keys.D))
-            position += _right * Speed * (float)e.Time;
+            Position += _right * Speed * (float)e.Time;
         if (input.IsKeyDown(Keys.Space))
-            position.Y += Speed * (float)e.Time;
+            Position.Y += Speed * (float)e.Time;
         if (input.IsKeyDown(Keys.C))
-            position.Y -= Speed * (float)e.Time;
+            Position.Y -= Speed * (float)e.Time;
 
         if (_firstMove) {
             LastPos = new Vector2(mouse.X, mouse.Y);
