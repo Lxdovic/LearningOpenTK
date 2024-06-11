@@ -55,8 +55,13 @@ internal class Chunk {
 
         for (var x = 0; x < Size; x++)
         for (var z = 0; z < Size; z++) {
+            ;
+
             heightmap[x, z] = Game.HeightNoise.CalcPixel2D((int)(Position.X + x), (int)(Position.Z + z), 0.005f) / 255f;
-            heatmap[x, z] = Game.HeatNoise.CalcPixel2D((int)(Position.X + x), (int)(Position.Z + z), 0.002f) / 255f;
+            heatmap[x, z] = (
+                Game.HeatNoise.CalcPixel2D((int)(Position.X + x), (int)(Position.Z + z), 0.001f) / 255f * 2 +
+                Game.HeatNoise.CalcPixel2D((int)(Position.X + x), (int)(Position.Z + z), 0.01f) / 255f / 2
+            ) / 3f;
         }
 
 
