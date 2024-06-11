@@ -1,17 +1,16 @@
 using LearningOpenTK.Graphics;
 using OpenTK.Graphics.OpenGL.Compatibility;
 using OpenTK.Mathematics;
-using Simplex;
 
 namespace LearningOpenTK.World;
 
-using Block = (int type, int x, int y, int z);
+using Block = (uint type, int x, int y, int z);
 
 internal class Chunk {
     internal const int Size = 16;
     private const int Height = 64;
 
-    private readonly ushort[] _blocks = new ushort[Size * Height * Size];
+    private readonly uint[] _blocks = new uint[Size * Height * Size];
     private readonly List<uint> _chunkIndices;
     private readonly List<Vector2> _chunkUvs;
     private readonly List<Vector3> _chunkVertices;
@@ -70,34 +69,35 @@ internal class Chunk {
             for (var y = 0; y < Height; y++) {
                 if (heat < 0.8) {
                     var type = columnHeight switch {
-                        _ when y < columnHeight - 1 => BlockType.Dirt,
-                        _ when y == columnHeight - 1 => BlockType.Grass,
+                        _ when y <= columnHeight - 4 => BlockType.Stone,
+                        _ when y <= columnHeight - 2 && y > columnHeight - 4 => BlockType.Dirt,
+                        _ when y <= columnHeight - 1 => BlockType.Grass,
                         _ => BlockType.Air
                     };
 
-                    _blocks[x + y * Size + z * Size * Height] = (ushort)(((int)type << 14) | (x << 10) | (y << 4) | z);
+                    _blocks[x + y * Size + z * Size * Height] = (uint)(((int)type << 14) | (x << 10) | (y << 4) | z);
                 }
 
                 if (heat >= 0.8) {
                     var type = columnHeight switch {
-                        _ when y <= columnHeight - 4 => BlockType.Dirt,
+                        _ when y <= columnHeight - 4 => BlockType.SandStone,
                         _ when y <= columnHeight - 1 && y > columnHeight - 4 => BlockType.Sand,
                         _ => BlockType.Air
                     };
 
-                    _blocks[x + y * Size + z * Size * Height] = (ushort)(((int)type << 14) | (x << 10) | (y << 4) | z);
+                    _blocks[x + y * Size + z * Size * Height] = (uint)(((int)type << 14) | (x << 10) | (y << 4) | z);
                 }
             }
         }
     }
 
-    public Block GetBlockData(ushort block) {
-        var type = block >> 14;
+    public Block GetBlockData(uint block) {
+        var type = (block >> 14) & 0b1111;
         var x = (block >> 10) & 0b1111;
         var y = (block >> 4) & 0b111111;
         var z = block & 0b1111;
 
-        return (type, x, y, z);
+        return (type, (int)x, (int)y, (int)z);
     }
 
     private Block LeftBlockData(Block block) {

@@ -6,7 +6,9 @@ internal enum BlockType {
     Air,
     Dirt,
     Grass,
-    Sand
+    Sand,
+    SandStone,
+    Stone
 }
 
 internal enum Face {

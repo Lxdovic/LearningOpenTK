@@ -32,6 +32,24 @@ internal static class TextureData {
                     new Vector2(2f, 14f),
                     new Vector2(2f, 14f)
                 ]
+            }, {
+                BlockType.SandStone, [
+                    new Vector2(0f, 3f),
+                    new Vector2(0f, 3f),
+                    new Vector2(0f, 3f),
+                    new Vector2(0f, 3f),
+                    new Vector2(0f, 3f),
+                    new Vector2(0f, 3f)
+                ]
+            }, {
+                BlockType.Stone, [
+                    new Vector2(1f, 15f),
+                    new Vector2(1f, 15f),
+                    new Vector2(1f, 15f),
+                    new Vector2(1f, 15f),
+                    new Vector2(1f, 15f),
+                    new Vector2(1f, 15f)
+                ]
             }
         };
 }
