@@ -49,25 +49,28 @@ internal class Chunk {
         _ibo = new Ibo(_chunkIndices);
     }
 
-    public (float[,] heightmap, float heat) GenerateChunk() {
+    public (float[,] heightmap, float[,] heatmap) GenerateChunk() {
         var heightmap = new float[Size, Size];
+        var heatmap = new float[Size, Size];
 
         for (var x = 0; x < Size; x++)
-        for (var z = 0; z < Size; z++)
+        for (var z = 0; z < Size; z++) {
             heightmap[x, z] = Game.HeightNoise.CalcPixel2D((int)(Position.X + x), (int)(Position.Z + z), 0.005f) / 255f;
+            heatmap[x, z] = Game.HeatNoise.CalcPixel2D((int)(Position.X + x), (int)(Position.Z + z), 0.002f) / 255f;
+        }
 
-        var heat = Game.HeatNoise.CalcPixel2D((int)Position.X, (int)Position.Z, 0.001f) / 255f;
 
-        return (heightmap, heat);
+        return (heightmap, heatmap);
     }
 
-    public void GenerateBlocks(float[,] heightMap, float heat) {
+    public void GenerateBlocks(float[,] heightMap, float[,] heatmap) {
         for (var x = 0; x < Size; x++)
         for (var z = 0; z < Size; z++) {
             var columnHeight = (int)(heightMap[x, z] * 32);
+            var heat = heatmap[x, z];
 
             for (var y = 0; y < Height; y++) {
-                if (heat < 0.8) {
+                if (heat < 0.6) {
                     var type = columnHeight switch {
                         _ when y <= columnHeight - 4 => BlockType.Stone,
                         _ when y <= columnHeight - 2 && y > columnHeight - 4 => BlockType.Dirt,
@@ -78,7 +81,7 @@ internal class Chunk {
                     _blocks[x + y * Size + z * Size * Height] = (uint)(((int)type << 14) | (x << 10) | (y << 4) | z);
                 }
 
-                if (heat >= 0.8) {
+                if (heat >= 0.6) {
                     var type = columnHeight switch {
                         _ when y <= columnHeight - 4 => BlockType.SandStone,
                         _ when y <= columnHeight - 1 && y > columnHeight - 4 => BlockType.Sand,
