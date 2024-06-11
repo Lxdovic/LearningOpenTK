@@ -15,7 +15,6 @@ internal sealed class Game : GameWindow {
     public static Noise HeightNoise = new();
     private readonly Camera _camera;
     private readonly List<Chunk> _chunks = new();
-    private readonly Queue<Chunk> _chunksToUnload = new();
     private readonly ShaderProgram _shaderProgram;
 
     private Vector3 _currentChunk;
@@ -69,9 +68,12 @@ internal sealed class Game : GameWindow {
         GL.UniformMatrix4f(viewLocation, 1, true, view);
         GL.UniformMatrix4f(projectionLocation, 1, true, projection);
 
-        foreach (var chunk in _chunks)
+        foreach (var chunk in _chunks) {
+            if (Vector3.Distance(chunk.Position, _currentChunk) > RenderDistance * Chunk.Size) continue;
+            
             chunk.Render(_shaderProgram);
-
+        }
+        
         Context.SwapBuffers();
 
         base.OnRenderFrame(args);
@@ -90,14 +92,6 @@ internal sealed class Game : GameWindow {
             _currentChunk = currentChunk;
             LoadChunks();
         }
-
-        const int chunksToUnloadPerFrame = 2;
-
-        for (var i = 0; i < chunksToUnloadPerFrame && _chunksToUnload.Count > 0; i++) {
-            var chunk = _chunksToUnload.Dequeue();
-            chunk.Dispose();
-            _chunks.Remove(chunk);
-        }
     }
 
     private void LoadChunks() {
@@ -110,9 +104,11 @@ internal sealed class Game : GameWindow {
                 _chunks.Add(new Chunk(chunkPosition));
         }
 
-        foreach (var chunk in _chunks)
-            if (Vector3.Distance(chunk.Position, _currentChunk) > RenderDistance * Chunk.Size)
-                _chunksToUnload.Enqueue(chunk);
+        foreach (var chunk in _chunks.ToList())
+            if (Vector3.Distance(chunk.Position, _currentChunk) > RenderDistance * Chunk.Size) {
+                chunk.Dispose();
+                _chunks.Remove(chunk);
+            }
     }
 
     private bool ChunkExists(Vector3 position) {
