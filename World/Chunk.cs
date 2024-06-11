@@ -1,7 +1,7 @@
 using LearningOpenTK.Graphics;
 using OpenTK.Graphics.OpenGL.Compatibility;
 using OpenTK.Mathematics;
-using SimplexNoise;
+using Simplex;
 
 namespace LearningOpenTK.World;
 
@@ -30,9 +30,9 @@ internal class Chunk {
         _chunkUvs = new List<Vector2>();
         _chunkIndices = new List<uint>();
 
-        var heightMap = GenerateChunk();
+        var (heightMap, heat) = GenerateChunk();
 
-        GenerateBlocks(heightMap);
+        GenerateBlocks(heightMap, heat);
         GenFaces();
 
 
@@ -50,29 +50,43 @@ internal class Chunk {
         _ibo = new Ibo(_chunkIndices);
     }
 
-    public float[,] GenerateChunk() {
+    public (float[,] heightmap, float heat) GenerateChunk() {
         var heightmap = new float[Size, Size];
 
         for (var x = 0; x < Size; x++)
         for (var z = 0; z < Size; z++)
-            heightmap[x, z] = Noise.CalcPixel2D((int)(Position.X + x), (int)(Position.Z + z), 0.005f) / 128f / 2;
+            heightmap[x, z] = Game.HeightNoise.CalcPixel2D((int)(Position.X + x), (int)(Position.Z + z), 0.005f) / 255f;
 
-        return heightmap;
+        var heat = Game.HeatNoise.CalcPixel2D((int)Position.X, (int)Position.Z, 0.001f) / 255f;
+
+        return (heightmap, heat);
     }
 
-    public void GenerateBlocks(float[,] heightMap) {
+    public void GenerateBlocks(float[,] heightMap, float heat) {
         for (var x = 0; x < Size; x++)
         for (var z = 0; z < Size; z++) {
             var columnHeight = (int)(heightMap[x, z] * 32);
 
             for (var y = 0; y < Height; y++) {
-                var type = columnHeight switch {
-                    _ when y < columnHeight - 1 => BlockType.Dirt,
-                    _ when y == columnHeight - 1 => BlockType.Grass,
-                    _ => BlockType.Air
-                };
+                if (heat < 0.8) {
+                    var type = columnHeight switch {
+                        _ when y < columnHeight - 1 => BlockType.Dirt,
+                        _ when y == columnHeight - 1 => BlockType.Grass,
+                        _ => BlockType.Air
+                    };
 
-                _blocks[x + y * Size + z * Size * Height] = (ushort)(((int)type << 14) | (x << 10) | (y << 4) | z);
+                    _blocks[x + y * Size + z * Size * Height] = (ushort)(((int)type << 14) | (x << 10) | (y << 4) | z);
+                }
+
+                if (heat >= 0.8) {
+                    var type = columnHeight switch {
+                        _ when y <= columnHeight - 4 => BlockType.Dirt,
+                        _ when y <= columnHeight - 1 && y > columnHeight - 4 => BlockType.Sand,
+                        _ => BlockType.Air
+                    };
+
+                    _blocks[x + y * Size + z * Size * Height] = (ushort)(((int)type << 14) | (x << 10) | (y << 4) | z);
+                }
             }
         }
     }

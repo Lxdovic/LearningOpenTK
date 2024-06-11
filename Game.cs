@@ -4,12 +4,15 @@ using OpenTK.Graphics.OpenGL.Compatibility;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using Simplex;
 
 namespace LearningOpenTK;
 
 internal sealed class Game : GameWindow {
     private const int RenderDistance = 10;
     internal static Texture Atlas = new("resources/textures/atlas.png");
+    public static Noise HeatNoise = new();
+    public static Noise HeightNoise = new();
     private readonly Camera _camera;
     private readonly List<Chunk> _chunks = new();
     private readonly Queue<Chunk> _chunksToUnload = new();
@@ -24,7 +27,7 @@ internal sealed class Game : GameWindow {
         _height = height;
         _shaderProgram = new ShaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
         _camera = new Camera(_width, _height, new Vector3(0f, 44f, 3f));
-
+        
         CenterWindow(new Vector2i(width, height));
     }
 
