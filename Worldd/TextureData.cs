@@ -1,6 +1,6 @@
 using OpenTK.Mathematics;
 
-namespace LearningOpenTK.World;
+namespace LearningOpenTK.Worldd;
 
 internal static class TextureData {
     public static Dictionary<BlockType, Vector2[]> BlockTypeUvs =

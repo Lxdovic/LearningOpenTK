@@ -1,23 +1,17 @@
 using LearningOpenTK.Graphics;
-using LearningOpenTK.World;
 using OpenTK.Graphics.OpenGL.Compatibility;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using Simplex;
 
 namespace LearningOpenTK;
 
 internal sealed class Game : GameWindow {
-    private const int RenderDistance = 10;
-    internal static Texture Atlas = new("resources/textures/atlas.png");
-    public static Noise HeatNoise = new();
-    public static Noise HeightNoise = new();
+    internal static readonly Texture Atlas = new("resources/textures/atlas.png");
     private readonly Camera _camera;
-    private readonly List<Chunk> _chunks = new();
     private readonly ShaderProgram _shaderProgram;
+    private readonly World _world;
 
-    private Vector3 _currentChunk;
     private int _width, _height;
 
     public Game(int width, int height) : base(GameWindowSettings.Default,
@@ -26,7 +20,9 @@ internal sealed class Game : GameWindow {
         _height = height;
         _shaderProgram = new ShaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
         _camera = new Camera(_width, _height, new Vector3(0f, 44f, 3f));
-        
+
+        _world = new World();
+
         CenterWindow(new Vector2i(width, height));
     }
 
@@ -54,8 +50,6 @@ internal sealed class Game : GameWindow {
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        LoadChunks();
-
         var model = Matrix4.Identity;
         var view = _camera.GetViewMatrix();
         var projection = _camera.GetProjectionMatrix();
@@ -68,12 +62,10 @@ internal sealed class Game : GameWindow {
         GL.UniformMatrix4f(viewLocation, 1, true, view);
         GL.UniformMatrix4f(projectionLocation, 1, true, projection);
 
-        foreach (var chunk in _chunks) {
-            if (Vector3.Distance(chunk.Position, _currentChunk) > RenderDistance * Chunk.Size) continue;
-            
-            chunk.Render(_shaderProgram);
-        }
-        
+        _world.Render(_shaderProgram);
+
+        Title = "MCC; FPS: " + (1f / args.Time).ToString("0.");
+
         Context.SwapBuffers();
 
         base.OnRenderFrame(args);
@@ -83,45 +75,5 @@ internal sealed class Game : GameWindow {
         base.OnUpdateFrame(args);
 
         _camera.Update(KeyboardState, MouseState, args);
-
-        var currentChunk =
-            new Vector3((int)(_camera.Position.X / Chunk.Size) * Chunk.Size, 0,
-                (int)(_camera.Position.Z / Chunk.Size) * Chunk.Size);
-
-        if (currentChunk != _currentChunk) {
-            _currentChunk = currentChunk;
-            LoadChunks();
-        }
-    }
-
-    private void LoadChunks() {
-        for (var x = -RenderDistance; x <= RenderDistance; x++)
-        for (var z = -RenderDistance; z <= RenderDistance; z++) {
-            var chunkPosition = new Vector3(_currentChunk.X + x * Chunk.Size, 0, _currentChunk.Z + z * Chunk.Size);
-
-            if (!ChunkExists(chunkPosition) &&
-                Vector3.Distance(chunkPosition, _currentChunk) <= RenderDistance * Chunk.Size)
-                _chunks.Add(new Chunk(chunkPosition));
-        }
-
-        foreach (var chunk in _chunks.ToList())
-            if (Vector3.Distance(chunk.Position, _currentChunk) > RenderDistance * Chunk.Size) {
-                chunk.Dispose();
-                _chunks.Remove(chunk);
-            }
-    }
-
-    private bool ChunkExists(Vector3 position) {
-        return _chunks.Any(chunk => chunk.Position == position);
-    }
-
-    protected override void OnUnload() {
-        base.OnUnload();
-
-        _shaderProgram.Delete();
-        Atlas.Delete();
-
-        foreach (var chunk in _chunks)
-            chunk.Dispose();
     }
 }

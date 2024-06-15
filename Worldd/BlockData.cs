@@ -1,6 +1,6 @@
 using OpenTK.Mathematics;
 
-namespace LearningOpenTK.World;
+namespace LearningOpenTK.Worldd;
 
 internal enum BlockType {
     Air,

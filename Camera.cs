@@ -6,7 +6,7 @@ namespace LearningOpenTK;
 
 internal sealed class Camera(float width, float height, Vector3 position) {
     private const float Sensitivity = 0.1f;
-    private const float Speed = 200f;
+    private const float Speed = 64f;
     private bool _firstMove = true;
     private Vector3 _front = -Vector3.UnitZ;
     private float _pitch;
